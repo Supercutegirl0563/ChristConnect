@@ -18,7 +18,6 @@ struct Announcement: Identifiable {
     let author: String
     let isPinned: Bool
     let isRead: Bool
-    let imageURL: String?
 }
 
 enum AnnouncementCategory: String, CaseIterable {
@@ -100,7 +99,7 @@ struct Home: View {
             author: "Academic Office",
             isPinned: true,
             isRead: false,
-            imageURL: nil
+            
         ),
         Announcement(
             title: "Annual Sports Day 2026",
@@ -110,7 +109,7 @@ struct Home: View {
             author: "PE Department",
             isPinned: true,
             isRead: false,
-            imageURL: nil
+            
         ),
         Announcement(
             title: "CCFA Auditions Open",
@@ -120,7 +119,7 @@ struct Home: View {
             author: "CCA Board",
             isPinned: false,
             isRead: true,
-            imageURL: nil
+            
         ),
         Announcement(
             title: "School Library Extended Hours",
@@ -130,7 +129,7 @@ struct Home: View {
             author: "Library",
             isPinned: false,
             isRead: true,
-            imageURL: nil
+            
         ),
         Announcement(
             title: "Student Leadership Applications Open",
@@ -140,7 +139,7 @@ struct Home: View {
             author: "Student Affairs",
             isPinned: false,
             isRead: false,
-            imageURL: nil
+            
         ),
         Announcement(
             title: "Water Outage - Block C",
@@ -150,7 +149,7 @@ struct Home: View {
             author: "Admin Office",
             isPinned: false,
             isRead: true,
-            imageURL: nil
+            
         ),
         Announcement(
             title: "Inter-Class Football Tournament Results",
@@ -160,7 +159,7 @@ struct Home: View {
             author: "Sports Council",
             isPinned: false,
             isRead: true,
-            imageURL: nil
+            
         )
     ]
 

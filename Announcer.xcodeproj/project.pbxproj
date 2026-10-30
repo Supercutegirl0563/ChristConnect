@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		6354A9339B740F753AA545CC /* Pods_Announcer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 713E83F92A63E4D0A1E7994E /* Pods_Announcer.framework */; };
+		BF18C747309207BC0098DF87 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = BF18C746309207BC0098DF87 /* FirebaseFirestore */; };
 		BF1DD855308EEE6F0098C26C /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = BF1DD854308EEE6F0098C26C /* FirebaseAnalytics */; };
 /* End PBXBuildFile section */
 
@@ -33,6 +34,7 @@
 			files = (
 				BF1DD855308EEE6F0098C26C /* FirebaseAnalytics in Frameworks */,
 				6354A9339B740F753AA545CC /* Pods_Announcer.framework in Frameworks */,
+				BF18C747309207BC0098DF87 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,7 +87,6 @@
 				BF760E5C302828920060A150 /* Sources */,
 				BF760E5D302828920060A150 /* Frameworks */,
 				BF760E5E302828920060A150 /* Resources */,
-				E119954074270FB3DB09BE9D /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -97,6 +98,7 @@
 			name = Announcer;
 			packageProductDependencies = (
 				BF1DD854308EEE6F0098C26C /* FirebaseAnalytics */,
+				BF18C746309207BC0098DF87 /* FirebaseFirestore */,
 			);
 			productName = Announcer;
 			productReference = BF760E60302828920060A150 /* Announcer.app */;
@@ -170,27 +172,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E119954074270FB3DB09BE9D /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Announcer/Pods-Announcer-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Announcer/Pods-Announcer-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Announcer/Pods-Announcer-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -430,6 +411,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		BF18C746309207BC0098DF87 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BF1DD853308EEE6F0098C26C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
 		BF1DD854308EEE6F0098C26C /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = BF1DD853308EEE6F0098C26C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

@@ -7,6 +7,9 @@
 
 import SwiftUI
 import FirebaseCore
+import FirebaseFirestore
+
+let db = Firestore.firestore()
 
 class AppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication,
@@ -16,8 +19,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     return true
   }
 }
-
-
 
 @main
 struct AnnouncerApp: App {
