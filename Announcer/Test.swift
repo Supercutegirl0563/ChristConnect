@@ -18,7 +18,7 @@ struct Test: View {
             Button {
                 
                 Task {
-                    await readData()
+                    await readData(name: "title")
                 }
                 
             } label: {
@@ -43,11 +43,11 @@ struct Test: View {
         }
     }
 
-    private func readData() async {
+    private func readData(name: String) async {
         do {
-          let snapshot = try await db.collection("users").getDocuments()
+          let snapshot = try await db.collection("Announcement").getDocuments()
           for document in snapshot.documents {
-              print("\(document.documentID) => \(type( of:document.data()["last"] ?? "Not found"))")
+              print("\(document.documentID) => \(document.data()[name] ?? "No value for key \(name)")")
           }
         } catch {
           print("Error getting documents: \(error)")

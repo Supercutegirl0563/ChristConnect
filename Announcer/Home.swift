@@ -6,11 +6,12 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
 
 // MARK: - Data Models
 
 struct Announcement: Identifiable {
-    let id = UUID()
+    let id: String
     let title: String
     let body: String
     let category: AnnouncementCategory
@@ -18,6 +19,7 @@ struct Announcement: Identifiable {
     let author: String
     let isPinned: Bool
     let isRead: Bool
+    
 }
 
 enum AnnouncementCategory: String, CaseIterable {
@@ -75,6 +77,10 @@ struct QuickAccessItem: Identifiable {
 
 struct Home: View {
 
+    @State private var announcements: [Announcement] = []
+
+    private let db = Firestore.firestore()
+    
     @State private var username = "Alvin"
     @State private var searchText = ""
     @State private var selectedCategory: AnnouncementCategory = .all
@@ -90,79 +96,172 @@ struct Home: View {
         }
     }()
 
-    private let sampleAnnouncements: [Announcement] = [
-        Announcement(
-            title: "Mid-Term Examination Schedule Released",
-            body: "The mid-term examination schedule for all levels has been posted. Please check the academic portal for your individual timetables.",
-            category: .academic,
-            date: Calendar.current.date(byAdding: .hour, value: -2, to: Date())!,
-            author: "Academic Office",
-            isPinned: true,
-            isRead: false,
-            
-        ),
-        Announcement(
-            title: "Annual Sports Day 2026",
-            body: "This year's Sports Day will be held on 25 September at the National Stadium. All students are required to participate. Registration closes on 15 September.",
-            category: .sports,
-            date: Calendar.current.date(byAdding: .hour, value: -5, to: Date())!,
-            author: "PE Department",
-            isPinned: true,
-            isRead: false,
-            
-        ),
-        Announcement(
-            title: "CCFA Auditions Open",
-            body: "Auditions for the Chinese Cultural and Fine Arts Association drama production are now open. Sign up at the CCA office by Friday.",
-            category: .cca,
-            date: Calendar.current.date(byAdding: .day, value: -1, to: Date())!,
-            author: "CCA Board",
-            isPinned: false,
-            isRead: true,
-            
-        ),
-        Announcement(
-            title: "School Library Extended Hours",
-            body: "The library will remain open until 6 PM during the examination period starting next week. Additional study spaces have been set up on Level 3.",
-            category: .general,
-            date: Calendar.current.date(byAdding: .day, value: -1, to: Date())!,
-            author: "Library",
-            isPinned: false,
-            isRead: true,
-            
-        ),
-        Announcement(
-            title: "Student Leadership Applications Open",
-            body: "Applications for Student Council, Class Monitors, and Prefect positions are now open. Submit your applications through the portal before 20 September.",
-            category: .academic,
-            date: Calendar.current.date(byAdding: .day, value: -2, to: Date())!,
-            author: "Student Affairs",
-            isPinned: false,
-            isRead: false,
-            
-        ),
-        Announcement(
-            title: "Water Outage - Block C",
-            body: "There will be a scheduled water outage in Block C on Wednesday from 10 AM to 2 PM for pipe maintenance. Plan accordingly.",
-            category: .urgent,
-            date: Calendar.current.date(byAdding: .day, value: -3, to: Date())!,
-            author: "Admin Office",
-            isPinned: false,
-            isRead: true,
-            
-        ),
-        Announcement(
-            title: "Inter-Class Football Tournament Results",
-            body: "Congratulations to 4 Sapphire for winning the inter-class football tournament! Final score: 3-1 against 4 Pearl. Well played to all participants.",
-            category: .sports,
-            date: Calendar.current.date(byAdding: .day, value: -4, to: Date())!,
-            author: "Sports Council",
-            isPinned: false,
-            isRead: true,
-            
-        )
-    ]
+    private func fetchAnnouncements() async {
+        do {
+            let snapshot = try await db.collection("Announcement")
+                .getDocuments()
 
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime]
+
+            var loadedAnnouncements: [Announcement] = []
+
+            for document in snapshot.documents {
+                let data = document.data()
+
+                guard let title = data["title"] as? String else {
+                    print("\(document.documentID): Missing title")
+                    continue
+                }
+
+                guard let body = data["body"] as? String else {
+                    print("\(document.documentID): Missing body")
+                    continue
+                }
+
+                guard let categoryString = data["category"] as? String else {
+                    print("\(document.documentID): Invalid category")
+                    continue
+                }
+
+                // Accept ".sports", "sports", and "Sports"
+                let normalizedCategory = categoryString
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                    .replacingOccurrences(of: ".", with: "")
+
+                guard let category = AnnouncementCategory.allCases.first(
+                    where: {
+                        $0.rawValue.caseInsensitiveCompare(normalizedCategory) == .orderedSame
+                    }
+                ), category != .all else {
+                    print("\(document.documentID): Unknown category: \(categoryString)")
+                    continue
+                }
+
+                guard let dateString = data["date"] as? String,
+                      let date = formatter.date(from: dateString) else {
+                    print("\(document.documentID): Invalid date: \(data["date"] ?? "Missing")")
+                    continue
+                }
+
+                guard let author = data["author"] as? String else {
+                    print("\(document.documentID): Missing author")
+                    continue
+                }
+
+                let announcement = Announcement(
+                    id: document.documentID,
+                    title: title,
+                    body: body,
+                    category: category,
+                    date: date,
+                    author: author,
+                    isPinned: data["isPinned"] as? Bool ?? false,
+                    isRead: data["isRead"] as? Bool ?? false
+                )
+
+                loadedAnnouncements.append(announcement)
+            }
+
+            announcements = loadedAnnouncements.sorted {
+                if $0.isPinned != $1.isPinned {
+                    return $0.isPinned
+                }
+
+                return $0.date > $1.date
+            }
+
+            print("Successfully loaded \(announcements.count) announcements!")
+
+        } catch {
+            print("Firestore error: \(error)")
+        }
+    }
+    
+//    private let sampleAnnouncements: [Announcement] = [
+//        Announcement(
+//            title: "Mid-Term Examination Schedule Released",
+//            body: "The mid-term examination schedule for all levels has been posted. Please check the academic portal for your individual timetables.",
+//            category: .academic,
+//            date: Calendar.current.date(byAdding: .hour, value: -2, to: Date())!,
+//            author: "Academic Office",
+//            isPinned: true,
+//            isRead: false,
+//            
+//        ),
+//        Announcement(
+//            title: "Annual Sports Day 2026",
+//            body: "This year's Sports Day will be held on 25 September at the National Stadium. All students are required to participate. Registration closes on 15 September.",
+//            category: .sports,
+//            date: Calendar.current.date(byAdding: .hour, value: -5, to: Date())!,
+//            author: "PE Department",
+//            isPinned: true,
+//            isRead: false,
+//            
+//        ),
+//        Announcement(
+//            title: "CCFA Auditions Open",
+//            body: "Auditions for the Chinese Cultural and Fine Arts Association drama production are now open. Sign up at the CCA office by Friday.",
+//            category: .cca,
+//            date: Calendar.current.date(byAdding: .day, value: -1, to: Date())!,
+//            author: "CCA Board",
+//            isPinned: false,
+//            isRead: true,
+//            
+//        ),
+//        Announcement(
+//            title: "School Library Extended Hours",
+//            body: "The library will remain open until 6 PM during the examination period starting next week. Additional study spaces have been set up on Level 3.",
+//            category: .general,
+//            date: Calendar.current.date(byAdding: .day, value: -1, to: Date())!,
+//            author: "Library",
+//            isPinned: false,
+//            isRead: true,
+//            
+//        ),
+//        Announcement(
+//            title: "Student Leadership Applications Open",
+//            body: "Applications for Student Council, Class Monitors, and Prefect positions are now open. Submit your applications through the portal before 20 September.",
+//            category: .academic,
+//            date: Calendar.current.date(byAdding: .day, value: -2, to: Date())!,
+//            author: "Student Affairs",
+//            isPinned: false,
+//            isRead: false,
+//            
+//        ),
+//        Announcement(
+//            title: "Water Outage - Block C",
+//            body: "There will be a scheduled water outage in Block C on Wednesday from 10 AM to 2 PM for pipe maintenance. Plan accordingly.",
+//            category: .urgent,
+//            date: Calendar.current.date(byAdding: .day, value: -3, to: Date())!,
+//            author: "Admin Office",
+//            isPinned: false,
+//            isRead: true,
+//            
+//        ),
+//        Announcement(
+//            title: "Inter-Class Football Tournament Results",
+//            body: "Congratulations to 4 Sapphire for winning the inter-class football tournament! Final score: 3-1 against 4 Pearl. Well played to all participants.",
+//            category: .sports,
+//            date: Calendar.current.date(byAdding: .day, value: -4, to: Date())!,
+//            author: "Sports Council",
+//            isPinned: false,
+//            isRead: true,
+//            
+//        )
+//    ]
+
+    var filteredAnnouncements: [Announcement] {
+
+        if selectedCategory == .all {
+            return announcements
+        }
+
+        return announcements.filter {
+            $0.category == selectedCategory
+        }
+    }
+    
     private let sampleEvents: [SchoolEvent] = [
         SchoolEvent(title: "Mid-Term Break", date: Calendar.current.date(byAdding: .day, value: 7, to: Date())!, location: "School", category: "Holiday", color: .blue),
         SchoolEvent(title: "Career Guidance Talk", date: Calendar.current.date(byAdding: .day, value: 10, to: Date())!, location: "Auditorium", category: "Academic", color: .purple),
@@ -179,12 +278,12 @@ struct Home: View {
         QuickAccessItem(title: "Feedback", icon: "bubble.left.fill", color: .teal, destination: "feedback"),
     ]
 
-    var filteredAnnouncements: [Announcement] {
-        if selectedCategory == .all {
-            return sampleAnnouncements
-        }
-        return sampleAnnouncements.filter { $0.category == selectedCategory }
-    }
+//    var filteredAnnouncements: [Announcement] {
+//        if selectedCategory == .all {
+//            return sampleAnnouncements
+//        }
+//        return sampleAnnouncements.filter { $0.category == selectedCategory }
+//    }
 
     var pinnedAnnouncements: [Announcement] {
         filteredAnnouncements.filter { $0.isPinned }
@@ -232,6 +331,9 @@ struct Home: View {
                 }
             }
             .navigationBarHidden(true)
+            .task {
+                await fetchAnnouncements()
+            }
         }
     }
 
@@ -569,6 +671,11 @@ struct EventCard: View {
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.05), radius: 4, y: 2)
     }
+    
+    
+
+    
+    
 }
 
 // MARK: - Preview
