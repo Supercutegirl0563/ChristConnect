@@ -292,6 +292,10 @@ struct Home: View {
     var regularAnnouncements: [Announcement] {
         filteredAnnouncements.filter { !$0.isPinned }
     }
+    
+    var allAnnouncements: [Announcement] {
+        filteredAnnouncements
+    }
 
     var body: some View {
         NavigationStack {
@@ -467,6 +471,17 @@ struct Home: View {
                 }
                 .font(.subheadline)
                 .foregroundColor(.blue)
+                .sheet(isPresented: $showAllAnnouncements) {
+                    ScrollView(.vertical, showsIndicators: false) {
+                        ForEach(allAnnouncements) { announcement in
+                            AnnouncementCard(announcement: announcement)
+                        }
+                    }
+                    
+                    
+                    
+                    
+                }
             }
 
             ForEach(regularAnnouncements) { announcement in
