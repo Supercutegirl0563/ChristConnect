@@ -466,22 +466,27 @@ struct Home: View {
                     .font(.title3)
                     .bold()
                 Spacer()
-                Button("See All") {
-                    showAllAnnouncements = true
+                NavigationLink(destination: AllAnnouncementsView()) {
+                    Text("View All")
+                        .foregroundStyle(.blue)
+                        .font(.subheadline)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .cornerRadius(6)
                 }
-                .font(.subheadline)
-                .foregroundColor(.blue)
-                .sheet(isPresented: $showAllAnnouncements) {
-                    ScrollView(.vertical, showsIndicators: false) {
-                        ForEach(allAnnouncements) { announcement in
-                            AnnouncementCard(announcement: announcement)
-                        }
-                    }
-                    
-                    
-                    
-                    
-                }
+                .buttonStyle(.plain)
+//                Button("View All") {
+//                    showAllAnnouncements = true
+//                }
+//                .font(.subheadline)
+//                .foregroundColor(.blue)
+//                .sheet(isPresented: $showAllAnnouncements) {
+//                    ScrollView(.vertical, showsIndicators: false) {
+//                        ForEach(allAnnouncements) { announcement in
+//                            AnnouncementCard(announcement: announcement)
+//                        }
+//                    }
+//                }
             }
 
             ForEach(regularAnnouncements) { announcement in
